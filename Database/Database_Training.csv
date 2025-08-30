@@ -1,7 +1,7 @@
 No,NIK,NAMA,GENDER,NO TELEPON,PERUSAHAAN,DEPARTEMEN,DIVISI,JABATAN,GOLONGAN,TANGGAL TRAINING,JUDUL TRAINING,DURASI TRAINING,Expired date,POST TEST,KETERANGAN
 1,F04221066,Munawir jaenudin,Laki Laki,,HJF,Power Plant,Dispeck,Driver DT/gol.1,Golongan 1,2/13/2024,Defensive Driving Training,4,,,
 2,F0222000445,"IRWANS, TEST Exp dated input 2030",Laki Laki,8125331585,HJF,HRGA,HR,HR Supervisor,Golongan 3,8/16/2025,PERCOBAAN,5,8/16/2030,,
-3,F0222000445,IRWANS firebase mm dd yyyy,Laki Laki,8125331585,HJF,HRGA,HR,HR Supervisor,Golongan 3,4/12/2025,PERCOBAAN 2,10,,,
+3,F0222000445,IRWANS forget obs mm dd yyyy,Laki Laki,8125331585,HJF,HRGA,HR,HR Supervisor,Golongan 3,4/12/2025,PERCOBAAN 2,10,,,
 4,F12236052,MAHOLA GANI,Laki Laki,,HJF,Power Plant,DISPATCH,DRIVER DT/GOLONGAN 1,Golongan 1,2/13/2024,Defensive Driving Training,4,,,
 5,F05234592,AWAL RAYANA ARLI,Laki Laki,,HJF,Dispatch,Forklift,Operator forklift/golong1,Golongan 1,2/13/2024,Defensive Driving Training,4,,,
 6,F12222791,Imran rasyid,Laki Laki,,HJF,Dispatch,Produksi,Operator forklift ( golongan 1 ),Golongan 1,2/13/2024,Defensive Driving Training,4,,,
@@ -2932,4 +2932,5 @@ No,NIK,NAMA,GENDER,NO TELEPON,PERUSAHAAN,DEPARTEMEN,DIVISI,JABATAN,GOLONGAN,TANG
 2931,Kosong,NOVFRI FENDY PIRI,Laki Laki,85397343900,KPS,Dispatch,Dispatch,Driver DT 或巴伦司机,Golongan 1 级,6/14/2025,Defensive Driving Training,4,,,
 2932,S06253801,Indrawan mokodompit,Laki Laki,81243568242,KPS,Dispatch,Dispatch,Driver DT 或巴伦司机,Golongan 1 级,6/14/2025,Defensive Driving Training,4,,,
 2933,S06253793,HENDRIK RENGKUAN,Laki Laki,81356516090,KPS,HRGA,GA transport,Driver DT 或巴伦司机,Golongan 1 级,6/14/2025,Defensive Driving Training,4,,,
+
 2934,S06253788,Fernando manangkalangi,Laki Laki,81342995833,KPS,HRGA,HR&GA,Driver DT 或巴伦司机,Golongan 1 级,6/14/2025,Defensive Driving Training,4,,,
