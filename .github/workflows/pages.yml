@@ -11,10 +11,10 @@ permissions:
   id-token: write
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -29,16 +29,15 @@ jobs:
       - name: Build (Vite)
         run: npm run build
 
-      - name: Upload artifact (dist)
+      - name: Upload pages artifact
+        # gunakan upload-pages-artifact untuk GitHub Pages
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./dist
 
   deploy:
-    needs: build-and-deploy
+    needs: build
     runs-on: ubuntu-latest
-    permissions:
-      pages: write
     steps:
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
