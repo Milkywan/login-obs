@@ -1,64 +1,107 @@
 <!doctype html>
-<html lang="en" data-theme="synthwave">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CekRek - Cek Nama Rekening Bank/e-Wallet Indonesia</title>
-    <meta
-      name="title"
-      content="CekRek - Cek Nama Rekening Bank/e-Wallet Indonesia"
-    />
-    <meta
-      name="description"
-      content="Cek Nama Rekening Indonesia, Free API Cek Rekening, API Cek Nama Rekening"
-    />
-    <meta
-      name="keywords"
-      content="free api cek rekening, api cek rekening, cekrek api, cek rekening api, api cek rekening gratis, cek nama rekening api, cek nama rekening gratis"
-    />
-    <meta name="robots" content="index, nofollow" />
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CekRek - Cek Nama Rekening</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Poppins",sans-serif;padding:24px;background:#0b1020;color:#e6eef8}
+    .card{max-width:720px;margin:24px auto;padding:20px;border-radius:12px;background:linear-gradient(180deg,#111827, #0f1724);box-shadow:0 6px 30px rgba(0,0,0,.6)}
+    h1{margin:0 0 8px 0}
+    label{display:block;margin-top:12px;font-weight:600}
+    select,input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:#0b1220;color:#fff}
+    button{margin-top:14px;padding:10px 14px;border-radius:8px;border:none;background:#06b6d4;color:#042d3b;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .result{margin-top:16px;padding:12px;border-radius:8px;background:#09111a;color:#bfefff}
+    .error{background:#2b0f13;color:#ffb3b3}
+    small{display:block;margin-top:6px;color:#98a8b8}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Cek Nama Rekening</h1>
+    <small>Hanya untuk Bank / e-Wallet Indonesia — data dikirim ke layanan pengecekan publik</small>
 
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://cekrekening.github.io/" />
-    <meta
-      property="og:title"
-      content="CekRek - Cek Nama Rekening Bank/e-Wallet Indonesia"
-    />
-    <meta
-      property="og:description"
-      content="Free API Cek Rekening, API Cek Nama Rekening, Cek Nama Rekening Indonesia"
-    />
-    <meta
-      property="og:image"
-      content="https://cekrekening.github.io/logo.png"
-    />
+    <label for="bank">Bank / e-Wallet</label>
+    <select id="bank">
+      <option value="">-- Pilih Bank --</option>
+      <option value="bca">BCA</option>
+      <option value="bri">BRI</option>
+      <option value="bni">BNI</option>
+      <option value="mandiri">Mandiri</option>
+      <option value="gopay">GoPay</option>
+      <option value="ovo">OVO</option>
+      <option value="dana">DANA</option>
+      <!-- tambahkan jika perlu -->
+    </select>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta property="twitter:domain" content="cekrekening.github.io" />
-    <meta property="twitter:url" content="https://cekrekening.github.io/" />
-    <meta
-      name="twitter:title"
-      content="CekRek - Cek Nama Rekening Bank/e-Wallet Indonesia"
-    />
-    <meta
-      name="twitter:description"
-      content="Free API Cek Rekening, API Cek Nama Rekening, Cek Nama Rekening Indonesia"
-    />
-    <meta
-      name="twitter:image"
-      content="https://cekrekening.github.io/logo.png"
-    />
-    <link rel="icon" href="https://cekrekening.github.io/favicon.ico" />
+    <label for="acct">Nomor Rekening / No HP (untuk e-wallet)</label>
+    <input id="acct" inputmode="numeric" placeholder="contoh: 0123456789" />
 
-    <meta
-      name="google-site-verification"
-      content="NQISdBMyviFHiHZMxGWEcmjxOwD1rxlmjuKgZuugt6c"
-    />
-  </head>
+    <button id="btn">Cek Nama</button>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <div id="out" style="margin-top:10px"></div>
+  </div>
+
+<script>
+(() => {
+  const API = "https://cekrekening-api.belibayar.online/api/v1/account-inquiry";
+  const btn = document.getElementById("btn");
+  const bank = document.getElementById("bank");
+  const acct = document.getElementById("acct");
+  const out = document.getElementById("out");
+
+  function setOut(html, kind="info"){
+    out.innerHTML = "<div class='result "+(kind==="err"?"error":"")+"'>"+html+"</div>";
+  }
+
+  async function check(){
+    out.innerHTML = "";
+    const b = bank.value.trim();
+    const a = acct.value.trim().replace(/\s+/g,"");
+    if(!b){ setOut("Pilih bank terlebih dahulu.", "err"); return; }
+    if(!/^\d{6,20}$/.test(a)){ setOut("Nomor rekening tidak valid (6-20 digit).", "err"); return; }
+
+    btn.disabled = true;
+    btn.textContent = "Mencari...";
+
+    // timeout dengan AbortController (10s)
+    const controller = new AbortController();
+    const to = setTimeout(()=>controller.abort(), 10000);
+
+    try{
+      const resp = await fetch(API, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ account_bank: b, account_number: a }),
+        signal: controller.signal
+      });
+      clearTimeout(to);
+
+      if(!resp.ok){
+        setOut("Gagal melihat hasil (server mengembalikan status "+resp.status+").", "err");
+        return;
+      }
+      const j = await resp.json();
+      // tampilkan nama pemilik jika ada (sesuaikan field)
+      const name = (j && (j.data && j.data.account_holder)) || j.account_holder || j.message || null;
+      if(name){
+        setOut("<strong>Nama pemilik:</strong><br>"+String(name));
+      } else {
+        setOut("Data tidak ditemukan.");
+      }
+    }catch(e){
+      if(e.name === "AbortError") setOut("Request timeout (coba lagi).", "err");
+      else setOut("Terjadi kesalahan jaringan.", "err");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Cek Nama";
+    }
+  }
+
+  btn.addEventListener("click", check);
+  acct.addEventListener("keypress", (ev)=>{ if(ev.key==="Enter") check(); });
+})();
+</script>
+</body>
 </html>
