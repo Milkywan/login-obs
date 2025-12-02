@@ -30,7 +30,6 @@ jobs:
         run: npm run build
 
       - name: Upload pages artifact
-        # gunakan upload-pages-artifact untuk GitHub Pages
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./dist
