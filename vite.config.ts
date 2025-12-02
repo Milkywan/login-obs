@@ -1,8 +1,8 @@
-// vite.config.ts
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  base: '/login-obs/'   // <-- PENTING untuk GitHub project page
-})
+  // PENTING: ganti '/login-obs/' sesuai nama repo project page-mu
+  base: "/login-obs/",
+});
