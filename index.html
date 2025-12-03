@@ -3,96 +3,129 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CekRek - Cek Nama Rekening</title>
+  <title>Cek Rek - Pengecekan Nama Rekening</title>
+  <meta name="description" content="Simple UI untuk cek nama rekening via backend" />
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Poppins",sans-serif;padding:24px;background:#0b1020;color:#e6eef8}
-    .card{max-width:720px;margin:24px auto;padding:20px;border-radius:12px;background:linear-gradient(180deg,#111827, #0f1724);box-shadow:0 6px 30px rgba(0,0,0,.6)}
-    h1{margin:0 0 8px 0}
-    label{display:block;margin-top:12px;font-weight:600}
-    select,input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:#0b1220;color:#fff}
-    button{margin-top:14px;padding:10px 14px;border-radius:8px;border:none;background:#06b6d4;color:#042d3b;font-weight:700;cursor:pointer}
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .result{margin-top:16px;padding:12px;border-radius:8px;background:#09111a;color:#bfefff}
-    .error{background:#2b0f13;color:#ffb3b3}
-    small{display:block;margin-top:6px;color:#98a8b8}
+    :root {
+      --bg:#0b1220; --card:#0f1724; --muted:#9fb3c3; --accent:#06b6d4; --ok:#16a34a; --err:#ef4444;
+    }
+    body{font-family:system-ui,Segoe UI,Roboto,Poppins,Arial;background:linear-gradient(180deg,#061021,#071529);color:#e6eef8;margin:0;min-height:100vh;padding:28px;display:flex;align-items:center;justify-content:center}
+    .card{width:100%;max-width:760px;background:linear-gradient(180deg,#071226,#071a2b);padding:22px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.03)}
+    h1{margin:0 0 6px 0;font-size:20px}
+    p{color:var(--muted);margin:0 0 18px 0}
+    label{display:block;margin-top:12px;color:var(--muted);font-weight:600;font-size:13px}
+    select,input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,.04);background:transparent;color:#fff;margin-top:6px}
+    .row{display:flex;gap:12px}
+    .row > *{flex:1}
+    button{margin-top:14px;padding:10px 14px;border-radius:8px;border:0;background:var(--accent);color:#042d3b;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.6;cursor:default}
+    .result{margin-top:14px;padding:12px;border-radius:8px;background:rgba(15,46,61,.6);color:#cceffd}
+    .error{background:rgba(120,20,20,.6);color:#ffdede}
+    .small{font-size:12px;color:var(--muted);margin-top:6px}
+    footer{margin-top:18px;color:var(--muted);font-size:12px}
+    .help{margin-top:10px;color:var(--muted);font-size:13px}
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Cek Nama Rekening</h1>
-    <small>Hanya untuk Bank / e-Wallet Indonesia — data dikirim ke layanan pengecekan publik</small>
+    <h1>CekRek — Pengecekan Nama Rekening</h1>
+    <p>Masukkan bank dan nomor rekening, lalu klik "Cek". Frontend ini akan memanggil backend kamu.</p>
 
-    <label for="bank">Bank / e-Wallet</label>
+    <label for="bank">Pilih Bank / Provider</label>
     <select id="bank">
       <option value="">-- Pilih Bank --</option>
-      <option value="bca">BCA</option>
-      <option value="bri">BRI</option>
-      <option value="bni">BNI</option>
-      <option value="mandiri">Mandiri</option>
-      <option value="gopay">GoPay</option>
-      <option value="ovo">OVO</option>
-      <option value="dana">DANA</option>
-      <!-- tambahkan jika perlu -->
+      <option value="002">BRI (002)</option>
+      <option value="014">BCA (014)</option>
+      <option value="008">Mandiri (008)</option>
+      <option value="009">BNI (009)</option>
+      <option value="013">CIMB Niaga (013)</option>
+      <option value="gopay">GoPay (e-wallet)</option>
+      <option value="ovo">OVO (e-wallet)</option>
+      <option value="dana">DANA (e-wallet)</option>
+      <option value="other">Lainnya (agg.)</option>
     </select>
 
-    <label for="acct">Nomor Rekening / No HP (untuk e-wallet)</label>
-    <input id="acct" inputmode="numeric" placeholder="contoh: 0123456789" />
+    <label for="acct">Nomor Rekening / No. e-wallet</label>
+    <input id="acct" type="text" inputmode="numeric" placeholder="contoh: 00290100012345" />
 
-    <button id="btn">Cek Nama</button>
+    <div class="row">
+      <button id="btn">Cek Nama</button>
+      <button id="clear" style="background:#334155;color:#fff">Clear</button>
+    </div>
 
-    <div id="out" style="margin-top:10px"></div>
+    <div id="out" class="result" style="display:none"></div>
+    <div id="note" class="help">Note: Jika backend di-host di domain lain, ubah variabel <code>BACKEND_URL</code> di script.</div>
+    <footer>Jangan masukkan data sensitif di frontend. Backend wajib menyimpan credential & token.</footer>
   </div>
 
 <script>
 (() => {
-  const API = "https://cekrekening-api.belibayar.online/api/v1/account-inquiry";
+  // GANTI jika backend kamu beda (misal https://api.example.com)
+  const BACKEND_URL = "/api/check"; // relatif → cocok jika backend di domain yang sama atau reverse-proxy
+
+  const bankEl = document.getElementById("bank");
+  const acctEl = document.getElementById("acct");
   const btn = document.getElementById("btn");
-  const bank = document.getElementById("bank");
-  const acct = document.getElementById("acct");
+  const clear = document.getElementById("clear");
   const out = document.getElementById("out");
 
-  function setOut(html, kind="info"){
-    out.innerHTML = "<div class='result "+(kind==="err"?"error":"")+"'>"+html+"</div>";
+  function show(msg, isError=false){
+    out.style.display = "block";
+    out.className = "result" + (isError ? " error" : "");
+    if (typeof msg === "object") out.textContent = JSON.stringify(msg, null, 2);
+    else out.textContent = msg;
   }
+  function hide(){ out.style.display = "none"; out.textContent = ""; }
+
+  clear.addEventListener("click", ()=>{ acctEl.value=""; hide(); bankEl.value=""; });
 
   async function check(){
-    out.innerHTML = "";
-    const b = bank.value.trim();
-    const a = acct.value.trim().replace(/\s+/g,"");
-    if(!b){ setOut("Pilih bank terlebih dahulu.", "err"); return; }
-    if(!/^\d{6,20}$/.test(a)){ setOut("Nomor rekening tidak valid (6-20 digit).", "err"); return; }
+    hide();
+    const bank = bankEl.value.trim();
+    const acct = acctEl.value.trim().replace(/\s+/g,"");
+    if(!bank){ show("Pilih bank dulu.", true); return; }
+    if(!acct || acct.length < 6){ show("Nomor rekening tidak valid (minimal 6 digit).", true); return; }
 
     btn.disabled = true;
     btn.textContent = "Mencari...";
 
-    // timeout dengan AbortController (10s)
-    const controller = new AbortController();
-    const to = setTimeout(()=>controller.abort(), 10000);
+    const payload = { bankCode: bank, accountNumber: acct };
 
-    try{
-      const resp = await fetch(API, {
+    // timeout via AbortController
+    const controller = new AbortController();
+    const t = setTimeout(()=>controller.abort(), 12000);
+
+    try {
+      const resp = await fetch(BACKEND_URL, {
         method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ account_bank: b, account_number: a }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
         signal: controller.signal
       });
-      clearTimeout(to);
+
+      clearTimeout(t);
 
       if(!resp.ok){
-        setOut("Gagal melihat hasil (server mengembalikan status "+resp.status+").", "err");
+        let txt;
+        try{ txt = await resp.text(); } catch(e){ txt = resp.statusText; }
+        show("Server error: " + resp.status + " — " + txt, true);
         return;
       }
-      const j = await resp.json();
-      // tampilkan nama pemilik jika ada (sesuaikan field)
-      const name = (j && (j.data && j.data.account_holder)) || j.account_holder || j.message || null;
-      if(name){
-        setOut("<strong>Nama pemilik:</strong><br>"+String(name));
-      } else {
-        setOut("Data tidak ditemukan.");
+
+      const json = await resp.json();
+      // Normalisasi: backend diharapkan mengembalikan { success: bool, account_holder: string, message: ... } atau raw BRI payload
+      if(json.success === false){
+        show(json.message || "Tidak ditemukan.", true);
+        return;
       }
-    }catch(e){
-      if(e.name === "AbortError") setOut("Request timeout (coba lagi).", "err");
-      else setOut("Terjadi kesalahan jaringan.", "err");
+
+      // tampilkan hasil populer
+      // Prioritas: account_holder, data.accountName, data.account_holder, data
+      const holder = json.account_holder || (json.data && (json.data.accountName || json.data.account_holder)) || json.data || json;
+      show(holder || "Tidak ada data (format response tidak dikenali).");
+    } catch(err){
+      if(err.name === "AbortError") show("Timeout (coba lagi).", true);
+      else show("Network error: " + (err.message || err), true);
     } finally {
       btn.disabled = false;
       btn.textContent = "Cek Nama";
@@ -100,7 +133,7 @@
   }
 
   btn.addEventListener("click", check);
-  acct.addEventListener("keypress", (ev)=>{ if(ev.key==="Enter") check(); });
+  acctEl.addEventListener("keypress", (e)=>{ if(e.key === "Enter") check(); });
 })();
 </script>
 </body>
